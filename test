@@ -1,0 +1,6 @@
+targetScope = 'resourceGroup'
+param RGName = 'RG-Sentinel-Playbooks'
+
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2019-04-01' existing {
+  name: RGName
+}

@@ -1,0 +1,78 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workflows_bicepdemo_name": {
+            "defaultValue": "bicepdemo",
+            "type": "String"
+        },
+        "connections_office365_Email_Automation_externalid": {
+            "defaultValue": "/subscriptions/d781400b-6ce7-4b68-aaf2-6b71a353b7fc/resourceGroups/RG-Sentinel-Playbooks/providers/Microsoft.Web/connections/office365-Email-Automation",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('workflows_bicepdemo_name')]",
+            "location": "westeurope",
+            "tags": {
+                "LogicAppsCategory ": "security"
+            },
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_a_HTTP_request_is_received": {
+                            "type": "Request",
+                            "kind": "Http"
+                        }
+                    },
+                    "actions": {
+                        "Send_an_email_(V2)": {
+                            "runAfter": {},
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['office365']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "body": {
+                                    "To": "anssi@leikkikentta.onmicrosoft.com",
+                                    "Subject": "demo testing",
+                                    "Body": "<p><span style=\"white-space: pre-wrap;\">test content</span></p>",
+                                    "Importance": "Normal"
+                                },
+                                "path": "/v2/Mail"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "office365": {
+                                "id": "/subscriptions/d781400b-6ce7-4b68-aaf2-6b71a353b7fc/providers/Microsoft.Web/locations/westeurope/managedApis/office365",
+                                "connectionId": "[parameters('connections_office365_Email_Automation_externalid')]",
+                                "connectionName": "office365-Email-Automation"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
